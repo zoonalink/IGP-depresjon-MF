@@ -131,7 +131,7 @@ def preprocess_full_days(df, save_to_csv=False, output_csv_path=None):
 
 # extract scores
 
-def extract_days_per_scores(df, scores_csv_path='..\\depresjon\\scores.csv', save_to_csv=False, output_csv_path=None, min_days=None, exact_days=None):
+def extract_days_per_scores(df, scores_csv_path='..\\depresjon\\scores.csv', save_to_csv=False, output_csv_path=None, min_days=None, id=None):
     """
     Extract the number of days per ID from the 'scores' data.
 
@@ -141,7 +141,7 @@ def extract_days_per_scores(df, scores_csv_path='..\\depresjon\\scores.csv', sav
         save_to_csv (bool, optional): save the updated df to a CSV file? Defaults to True.
         output_csv_path (str, optional): csv filepath. Required if save_to_csv is True.
         min_days (int, optional): drop rows where 'days' column from 'scores.csv' is less than this value.
-        exact_days (int, optional): keep only the specified number of days per ID.
+        
 
     Returns:
         pd.DataFrame: df with the specified number of days per ID based on 'scores'.
@@ -161,25 +161,19 @@ def extract_days_per_scores(df, scores_csv_path='..\\depresjon\\scores.csv', sav
     else:
         df_filtered = merged_df
 
-    # keep only the specified exact number of days per ID (if provided)
-    if exact_days is not None:
-        df_filtered = (
-            df_filtered.sort_values(['id', 'days'])
-            .groupby('id', group_keys=False, as_index=False)
-            .apply(lambda group: group.iloc[:exact_days * 1440])
-            .reset_index(drop=True)
-        )
+    if id is not None:
+        df_filtered = df_filtered[df_filtered['id'] == id]
+    else:
+        df_filtered = df_filtered.copy()
 
     # assert that each ID has at least min_days and equals exact_days (if specified)
     if min_days is not None:
         assert all(df_filtered.groupby('id')['days'].min() >= min_days), "Some IDs have fewer than the minimum number of days."
-    if exact_days is not None:
-        assert all(df_filtered.groupby('id')['days'].count() == exact_days * 1440), "Some IDs do not have the exact number of days."
-
+    
     # drop cols number, days, age, afftype, melanch, inpatient, edu, marriage, work, madrs1, madrs2
     # keep gender
     cols = ['number', 'days', 'age', 'afftype', 'melanch', 'inpatient', 'edu', 'marriage', 'work', 'madrs1', 'madrs2']
-    df_filtered.drop(cols, axis=1, inplace=True)
+    df_filtered = df_filtered.drop(cols, axis=1).copy()
 
     # save to CSV if save_to_csv
     if save_to_csv:
@@ -190,3 +184,34 @@ def extract_days_per_scores(df, scores_csv_path='..\\depresjon\\scores.csv', sav
             print("Error: Please provide an output CSV path.")
 
     return df_filtered
+
+# pivot
+
+def pivot_dataframe(df):
+    """
+    Pivot the given DataFrame based on the specified columns and values.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to be pivoted.
+
+    Returns:
+        pandas.DataFrame: The pivoted DataFrame.
+
+    """
+    # copy of df 
+    df_copy = df.copy()
+
+    # extract hour and minute from timestamp
+    df_copy['hour'] = df_copy['timestamp'].dt.hour
+    df_copy['minute'] = df_copy['timestamp'].dt.minute
+
+    # pivot the DataFrame
+    df_pivot = df_copy.pivot(index=['date', 'gender', 'id', 'label', 'hour'], columns='minute', values='activity')
+
+    # rename columns
+    df_pivot.columns = [f'min_{minute:02d}' for minute in range(60)]
+
+    # reset index
+    df_pivot.reset_index(inplace=True)
+
+    return df_pivot
