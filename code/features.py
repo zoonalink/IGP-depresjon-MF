@@ -60,39 +60,36 @@ def activity_proportions(dataframe):
     # Create an empty dictionary to store the results
     results = {}
 
-    # drop columns
-    #columns_to_drop = ['timestamp', 'month', 'sunrise', 'sunset', 'sunrise_time', 'sunset_time']
-    #dataframe.drop(columns=columns_to_drop, inplace=True)
-
-    # Calculate inactiveDay
+   
+    # inactiveDay
     day_period_counts = dataframe.loc[dataframe['day_night'] == 0, ['id', 'date']].groupby(['id', 'date']).size().reset_index(name='day_period_count')
     inactive_day_counts = dataframe.loc[(dataframe['day_night'] == 0) & (dataframe['active_inactive'] == 0), ['id', 'date']].groupby(['id', 'date']).size().reset_index(name='inactive_day_count')
     inactive_day_prop = day_period_counts.merge(inactive_day_counts, on=['id', 'date'], how='left').fillna(0)
     inactive_day_prop['inactiveDay'] = inactive_day_prop['inactive_day_count'] / inactive_day_prop['day_period_count']
     results['inactiveDay'] = inactive_day_prop[['id', 'date', 'inactiveDay']]
 
-    # Calculate activeNight
+    # activeNight
     night_period_counts = dataframe.loc[dataframe['day_night'] == 1, ['id', 'date']].groupby(['id', 'date']).size().reset_index(name='night_period_count')
     active_night_counts = dataframe.loc[(dataframe['day_night'] == 1) & (dataframe['active_inactive'] == 1), ['id', 'date']].groupby(['id', 'date']).size().reset_index(name='active_night_count')
     active_night_prop = active_night_counts.merge(night_period_counts, on=['id', 'date'], how='left').fillna(0)
     active_night_prop['activeNight'] = active_night_prop['active_night_count'] / active_night_prop['night_period_count']
     results['activeNight'] = active_night_prop[['id', 'date', 'activeNight']]
 
-    # Calculate inactiveLight
+    # inactiveLight
     light_period_counts = dataframe.loc[dataframe['light_dark'] == 0, ['id', 'date']].groupby(['id', 'date']).size().reset_index(name='light_period_count')
     inactive_light_counts = dataframe.loc[(dataframe['light_dark'] == 0) & (dataframe['active_inactive'] == 0), ['id', 'date']].groupby(['id', 'date']).size().reset_index(name='inactive_light_count')
     inactive_light_prop = light_period_counts.merge(inactive_light_counts, on=['id', 'date'], how='left').fillna(0)
     inactive_light_prop['inactiveLight'] = inactive_light_prop['inactive_light_count'] / inactive_light_prop['light_period_count']
     results['inactiveLight'] = inactive_light_prop[['id', 'date', 'inactiveLight']]
 
-    # Calculate activeDark
+    # activeDark
     dark_period_counts = dataframe.loc[dataframe['light_dark'] == 1, ['id', 'date']].groupby(['id', 'date']).size().reset_index(name='dark_period_count')
     active_dark_counts = dataframe.loc[(dataframe['light_dark'] == 1) & (dataframe['active_inactive'] == 1), ['id', 'date']].groupby(['id', 'date']).size().reset_index(name='active_dark_count')
     active_dark_prop = active_dark_counts.merge(dark_period_counts, on=['id', 'date'], how='left').fillna(0)
     active_dark_prop['activeDark'] = active_dark_prop['active_dark_count'] / active_dark_prop['dark_period_count']
     results['activeDark'] = active_dark_prop[['id', 'date', 'activeDark']]
 
-    # Merge the results back into the original dataframe
+    # merge the results back into original dataframe
     for key, result in results.items():
         dataframe = dataframe.merge(result, on=['id', 'date'], how='left')
 
