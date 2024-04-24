@@ -131,7 +131,7 @@ def preprocess_full_days(df, save_to_csv=False, output_csv_path=None):
 
 # extract scores
 
-def extract_days_per_scores(df, scores_csv_path='..\\depresjon\\scores.csv', save_to_csv=False, output_csv_path=None, min_days=None, id=None):
+def extract_days_per_scores(df, scores_csv_path='..\\depresjon\\scores.csv', save_to_csv=False, output_csv_path=None):
     """
     Extract the number of days per ID from the 'scores' data.
 
@@ -140,52 +140,41 @@ def extract_days_per_scores(df, scores_csv_path='..\\depresjon\\scores.csv', sav
         scores_csv_path (str, optional): path to the 'scores' CSV file. Defaults to '..\\data\\depresjon\\scores.csv'.
         save_to_csv (bool, optional): save the updated df to a CSV file? Defaults to True.
         output_csv_path (str, optional): csv filepath. Required if save_to_csv is True.
-        min_days (int, optional): drop rows where 'days' column from 'scores.csv' is less than this value.
-        
 
     Returns:
         pd.DataFrame: df with the specified number of days per ID based on 'scores'.
-
-    Raises:
-        ValueError: If each ID does not have at least min_days or exact_days (if specified).
     """
-    # scores from the CSV file
+    # scores CSV file
     scores_df = pd.read_csv(scores_csv_path)
 
     # merge scores with the df based on the 'id' column
-    merged_df = pd.merge(df, scores_df, left_on='id', right_on='number', how='left')
+    merged_df = pd.merge(df, scores_df[['number', 'days', 'gender']], left_on='id', right_on='number', how='left')
 
-    # filter rows to keep the specified minimum number of days
-    if min_days is not None:
-        df_filtered = merged_df.groupby('id', group_keys=False, as_index=False, sort=False).filter(lambda group: group['days'].min() >= min_days)
-    else:
-        df_filtered = merged_df
+    # function to filter rows based on the 'days' column
+    def filter_rows(group):
+        days_to_keep = group['days'].iloc[0] * 1440  # Convert days to minutes
+        return group.head(days_to_keep)
 
-    if id is not None:
-        df_filtered = df_filtered[df_filtered['id'] == id]
-    else:
-        df_filtered = df_filtered.copy()
+    # filter to keep the specified number of rows per ID
+    df_filtered = merged_df.groupby('id', group_keys=False).apply(filter_rows)
 
-    # assert that each ID has at least min_days and equals exact_days (if specified)
-    if min_days is not None:
-        assert all(df_filtered.groupby('id')['days'].min() >= min_days), "Some IDs have fewer than the minimum number of days."
-    
-    # drop cols number, days, age, afftype, melanch, inpatient, edu, marriage, work, madrs1, madrs2
-    # keep gender
-    cols = ['number', 'days', 'age', 'afftype', 'melanch', 'inpatient', 'edu', 'marriage', 'work', 'madrs1', 'madrs2']
-    df_filtered = df_filtered.drop(cols, axis=1).copy()
+    # drop unnecessary columns
+    cols_to_drop = ['number']
+    df_filtered.drop(cols_to_drop, axis=1, inplace=True)
 
-    # save to CSV if save_to_csv
+    # save CSV if specified
     if save_to_csv:
         if output_csv_path:
             df_filtered.to_csv(output_csv_path, index=False)
             print(f"\n\ndf saved to {output_csv_path}")
         else:
-            print("Error: Please provide an output CSV path.")
-
+            raise ValueError("Please provide an output CSV path.")
+    
     return df_filtered
 
+
 # pivot
+
 
 def pivot_dataframe(df):
     """
@@ -215,3 +204,27 @@ def pivot_dataframe(df):
     df_pivot.reset_index(inplace=True)
 
     return df_pivot
+
+
+def reduce_days(df, days_to_keep):
+    """
+    Remove unnecessary rows from the DataFrame based on the number of days to keep for each ID.
+
+    Args:
+        df (pd.DataFrame): DataFrame containing the data.
+        days_to_keep (int): Number of days to keep for each ID.
+
+    Returns:
+        pd.DataFrame: DataFrame with unnecessary rows removed.
+    """
+    # number of minutes to keep for each ID
+    minutes_to_keep = days_to_keep * 1440
+
+    # filter rows for each ID
+    def filter_rows(group):
+        return group.head(minutes_to_keep)
+
+    # filter each group of rows grouped by ID
+    filtered_df = df.groupby('id', group_keys=False).apply(filter_rows)
+
+    return filtered_df
