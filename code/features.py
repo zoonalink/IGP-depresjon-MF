@@ -1,5 +1,8 @@
 import scipy.stats as sp
 import pandas as pd
+output_csv_path = '../output/'
+scores_csv_path = '../depresjon/scores.csv'
+
 # CSV file
 sunlight_df = pd.read_csv('../norway/Norway_Sunlight.csv')
 

@@ -1,6 +1,8 @@
 # split data inte m, f, both
 
 import pandas as pd
+output_csv_path = '../output/'
+scores_csv_path = '../depresjon/scores.csv'
 
 def split_and_prepare_data(df):
     # split into male, female, and both genders
