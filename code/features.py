@@ -46,17 +46,22 @@ def percent_zero(series):
     return zeros / total_values * 100
 
 
-# extract statistical features 
+import numpy as np
+
 def extract_features(dataframe):
     grouped = dataframe.groupby(['id', 'date'])['activity']
     features_df = grouped.agg(
         mean='mean',
         std='std',
+        median='median',  # Add median calculation
+        q1=lambda x: np.percentile(x, 25),  # Add 1st quartile calculation
+        q3=lambda x: np.percentile(x, 75),  # Add 3rd quartile calculation
         percent_zero=percent_zero,
         kurtosis=lambda x: sp.kurtosis(x, fisher=False)
     ).reset_index()
     features_df['kurtosis'] = features_df['kurtosis'].fillna(0)
     return features_df
+
 
 
 def activity_proportions(dataframe):
