@@ -53,7 +53,7 @@ def extract_features(dataframe):
     features_df = grouped.agg(
         mean='mean',
         std='std',
-        median='median',  # Add median calculation
+        median='median', 
         q1=lambda x: np.percentile(x, 25),  # Add 1st quartile calculation
         q3=lambda x: np.percentile(x, 75),  # Add 3rd quartile calculation
         percent_zero=percent_zero,

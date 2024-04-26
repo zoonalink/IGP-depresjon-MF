@@ -1,6 +1,9 @@
 # split data inte m, f, both
 
 import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 output_csv_path = '../output/'
 scores_csv_path = '../depresjon/scores.csv'
 
@@ -31,6 +34,8 @@ from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+import shap
 
 RANDOM_STATE = 5
 CV_FOLDS = 5
@@ -115,3 +120,100 @@ def print_top_models(results, metric=None, top_n=3):
         for i, (model, metrics) in enumerate(sorted_models[:top_n], 1):
             print(f"{i}. {model}: {metrics[metric]}")
         print()
+
+
+import warnings
+
+# suppress specific LightGBM warning
+warnings.filterwarnings('ignore', category=UserWarning, message='Usage of np.ndarray subset.*')
+
+
+# calculate SHAP feature importance
+def calculate_shap_feature_importance(models, X_train, shap_sampling='auto'):
+    feature_importance = {}
+    
+    #  SHAP values for each model
+    for model_name, model in models:
+        # Use TreeExplainer for tree-based models
+        if hasattr(model, 'tree_') or hasattr(model, 'estimators_') or isinstance(model, XGBClassifier):
+            explainer = shap.TreeExplainer(model)
+            shap_values = explainer.shap_values(X_train)
+        #  KernelExplainer for other models
+        else:
+            if shap_sampling == 'auto':
+                explainer = shap.KernelExplainer(model.predict, X_train)
+            elif shap_sampling == 'fast':
+                subset_df = pd.DataFrame(X_train.iloc[:1000, :].copy())
+                explainer = shap.KernelExplainer(model.predict, subset_df)
+            else:
+                raise ValueError("Invalid shap_sampling parameter. Choose 'auto' or 'fast'.")
+            shap_values = explainer.shap_values(X_train, nsamples=100)
+        
+        #  SHAP feature importance
+        if isinstance(shap_values, list):
+            #  models with multi-class outputs
+            shap_values = np.abs(shap_values).mean(axis=0)
+        feature_importance[model_name] = np.mean(np.abs(shap_values), axis=0)
+
+    # df
+    feature_importance_df = pd.DataFrame(feature_importance, index=X_train.columns)
+
+    
+    return feature_importance_df
+
+
+#calculate VIF
+def calculate_vif(X_train):
+    vif_data = {feature: variance_inflation_factor(X_train.values, i) 
+                for i, feature in enumerate(X_train.columns)}
+    return pd.DataFrame({'VIF': vif_data})
+
+# plot VIF
+def plot_vif(vif_df):
+    # descending order
+    vif_df = vif_df.sort_values('VIF', ascending=False)
+    plt.figure(figsize=(10, 6))
+    vif_df['VIF'].plot(kind='bar', figsize=(12, 8))
+    plt.title('Variance Inflation Factor (VIF)')
+    plt.xlabel('Features')
+    plt.ylabel('VIF Score')
+    plt.xticks(rotation=45, ha='right')
+    plt.tight_layout()
+    plt.show()
+
+# vif heatmap
+def plot_vif_heatmap(vif_df):
+    # descending order
+    vif_df = vif_df.sort_values('VIF', ascending=False)
+    plt.figure(figsize=(10, 6))
+    sns.heatmap(vif_df.T, cmap='viridis', annot=True, fmt=".3f")
+    plt.title('VIF Heatmap')
+    plt.xlabel('Features')
+    plt.ylabel('Models')
+    plt.tight_layout()
+    plt.show()
+
+
+# plot SHAP feature importance
+def plot_feature_importance(feature_importance_df):
+    # order df
+    feature_importance_df = feature_importance_df.reindex(feature_importance_df.mean(axis=1).sort_values(ascending=False).index)
+    plt.figure(figsize=(10, 6))
+    feature_importance_df.plot(kind='bar', figsize=(12, 8))
+    plt.title('Feature Importance Scores')
+    plt.xlabel('Features')
+    plt.ylabel('Importance Score')
+    plt.xticks(rotation=45, ha='right')
+    plt.legend(title='Models')
+    plt.tight_layout()
+    plt.show()
+
+# plot SHAP feature importance heatmap
+def plot_feature_importance_heatmap(feature_importance_df):
+    plt.figure(figsize=(10, 6))
+    sns.heatmap(feature_importance_df.T, cmap='viridis', annot=True, fmt=".3f")
+    plt.title('Feature Importance Heatmap')
+    plt.xlabel('Features')
+    plt.ylabel('Models')
+    plt.tight_layout()
+    plt.show()
