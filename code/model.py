@@ -121,6 +121,36 @@ def print_top_models(results, metric=None, top_n=3):
             print(f"{i}. {model}: {metrics[metric]}")
         print()
 
+import matplotlib.pyplot as plt
+
+def plot_top_models(results, metric=None, top_n=3):
+    if metric is None or metric == 'training_time':
+        # if metric not specified or is 'training_time', plot top models based on training time
+        sorted_models = sorted(results.items(), key=lambda x: x[1]['training_time'])
+        models = [model for model, _ in sorted_models[:top_n]]
+        times = [metrics['training_time'] for _, metrics in sorted_models[:top_n]]
+        
+        plt.bar(models, times)
+        plt.xlabel('Models')
+        plt.ylabel('Training Time (seconds)')
+        plt.title(f'Top {top_n} Models by Training Time')
+        plt.xticks(rotation=90)  # rotate
+        plt.tight_layout()  
+        plt.show()
+        
+    else:
+        # plot the top models for the specified metric
+        sorted_models = sorted(results.items(), key=lambda x: x[1][metric], reverse=True)
+        models = [model for model, _ in sorted_models[:top_n]]
+        metric_values = [metrics[metric] for _, metrics in sorted_models[:top_n]]
+        
+        plt.bar(models, metric_values)
+        plt.xlabel('Models')
+        plt.ylabel(metric.capitalize())
+        plt.title(f'Top {top_n} Models by {metric.capitalize()}')
+        plt.xticks(rotation=90)  # rotate
+        plt.tight_layout()  
+        plt.show()
 
 import warnings
 
