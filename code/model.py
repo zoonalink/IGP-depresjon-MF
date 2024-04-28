@@ -248,3 +248,65 @@ def plot_feature_importance_heatmap(feature_importance_df):
     plt.ylabel('Models')
     plt.tight_layout()
     plt.show()
+
+
+# subsetting x_train
+
+def keep_columns(df, cols_to_keep):
+    
+    # column names corresponding to the specified indices
+    col_names = [df.columns[i] for i in cols_to_keep]
+    
+    # new df
+    return df[col_names]
+
+
+def plot_metric_dicts(dict_list, metric_name):
+    """
+    Plots the values of a specified metric across multiple dictionaries.
+    
+    Args:
+        dict_list (list): A list of dictionaries containing the metric values.
+        metric_name (str): The name of the metric to plot.
+        
+    Returns:
+        None
+    """
+    # extract metric values and dictionary names
+    metric_values = []
+    dict_names = []
+    for i, d in enumerate(dict_list):
+        model_name = list(d.keys())[0]
+        metric_value = d[model_name][metric_name]
+        metric_values.append(metric_value)
+        dict_names.append(f"Subset {i+1}")
+    
+    # bar plot
+    fig, ax = plt.subplots()
+    bars = ax.bar(dict_names, metric_values)
+    ax.set_xlabel("")
+    ax.set_ylabel(metric_name.capitalize())
+    ax.set_title(f"{metric_name.capitalize()} Values across X_train subsets")
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    
+    # maximum bar height
+    max_height = max(metric_values)
+    
+    # value annotations
+    for bar in bars:
+        height = bar.get_height()
+        if height >= max_height * 0.9:  # vertical offset 
+            offset = -(max_height - height + 0.01)
+        else:
+            offset = max_height * 0.05
+        ax.annotate(
+            f"{height:.3f}",  # text 3 decimal places)
+            xy=(bar.get_x() + bar.get_width() / 2, height),  # position 
+            xytext=(0, offset),  # offset 
+            textcoords="offset points",
+            ha="center",  # horizontal 
+            va="bottom"  # vertical 
+        )
+    
+    plt.show()
