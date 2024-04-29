@@ -4,7 +4,32 @@ output_csv_path = '../output/'
 scores_csv_path = '../depresjon/scores.csv'
 
 def normalise_data(df, columns_to_normalise, method='standard', save_to_csv=False, output_csv_path=None):
-    
+    """
+    Normalise the specified columns of a DataFrame using either standardization or min-max scaling.
+
+    Parameters:
+    - df (pandas.DataFrame): The DataFrame containing the data to be normalized.
+    - columns_to_normalise (list): A list of column names to be normalized.
+    - method (str, optional): The normalization method to be used. Default is 'standard'.
+        - 'standard': Standardization using the StandardScaler.
+        - 'minmax': Min-max scaling using the MinMaxScaler.
+    - save_to_csv (bool, optional): Whether to save the normalized DataFrame to a CSV file. Default is False.
+    - output_csv_path (str, optional): The path to save the CSV file. Required if save_to_csv is True.
+
+    Returns:
+    - pandas.DataFrame: The normalized DataFrame.
+
+    Raises:
+    - ValueError: If an invalid method is provided.
+
+    Example usage:
+    ```
+    df = pd.read_csv('data.csv')
+    normalized_df = normalise_data(df, ['column1', 'column2'], method='minmax', save_to_csv=True, output_csv_path='normalized_data.csv')
+    ```
+
+    """
+
     from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
     if method == 'standard':
