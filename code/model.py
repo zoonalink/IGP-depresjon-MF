@@ -98,7 +98,7 @@ models1 = [
     ('SVC linear', LinearSVC(dual=False, max_iter=10000, random_state=RANDOM_STATE)),
     ('Naive Bayes', GaussianNB()),
     ('KNN', KNeighborsClassifier()),
-    ('Neural Network', MLPClassifier(max_iter=1000, random_state=RANDOM_STATE)),
+    ('Neural Network', MLPClassifier(max_iter=10000, random_state=RANDOM_STATE)),
     ('XGBoost', XGBClassifier(random_state=RANDOM_STATE)),
     ('LightGBM', LGBMClassifier(verbose=-1, random_state=RANDOM_STATE)),
     ('AdaBoost', AdaBoostClassifier(algorithm='SAMME', random_state=RANDOM_STATE)),
