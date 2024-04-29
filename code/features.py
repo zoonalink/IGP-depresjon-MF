@@ -3,33 +3,25 @@ import pandas as pd
 output_csv_path = '../output/'
 scores_csv_path = '../depresjon/scores.csv'
 
-def normalise_data(df, columns_to_normalise, method='standard', save_to_csv=False, output_csv_path=None):
+
+def normalise_data(X_train, X_val, method='standard'):
     """
-    Normalise the specified columns of a DataFrame using either standardization or min-max scaling.
+    Normalize the training and validation data using the normalization parameters learned from the training data.
 
     Parameters:
-    - df (pandas.DataFrame): The DataFrame containing the data to be normalized.
-    - columns_to_normalise (list): A list of column names to be normalized.
+    - X_train (pandas.DataFrame): The DataFrame containing the training data.
+    - X_val (pandas.DataFrame): The DataFrame containing the validation data.
     - method (str, optional): The normalization method to be used. Default is 'standard'.
-        - 'standard': Standardization using the StandardScaler.
-        - 'minmax': Min-max scaling using the MinMaxScaler.
-    - save_to_csv (bool, optional): Whether to save the normalized DataFrame to a CSV file. Default is False.
-    - output_csv_path (str, optional): The path to save the CSV file. Required if save_to_csv is True.
+      - 'standard': Standardization using the StandardScaler.
+      - 'minmax': Min-max scaling using the MinMaxScaler.
 
     Returns:
-    - pandas.DataFrame: The normalized DataFrame.
+    - X_train_scaled (pandas.DataFrame): The normalized training data.
+    - X_val_scaled (pandas.DataFrame): The normalized validation data.
 
     Raises:
     - ValueError: If an invalid method is provided.
-
-    Example usage:
-    ```
-    df = pd.read_csv('data.csv')
-    normalized_df = normalise_data(df, ['column1', 'column2'], method='minmax', save_to_csv=True, output_csv_path='normalized_data.csv')
-    ```
-
     """
-
     from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
     if method == 'standard':
@@ -39,17 +31,14 @@ def normalise_data(df, columns_to_normalise, method='standard', save_to_csv=Fals
     else:
         raise ValueError("Invalid method. Please choose either 'standard' or 'minmax'.")
 
-    df[columns_to_normalise] = scaler.fit_transform(df[columns_to_normalise])
+    # Fit the scaler on the training data
+    scaler.fit(X_train)
 
-    if save_to_csv:
-        if output_csv_path:
-            df.to_csv(output_csv_path, index=False)
-            print(f"df saved to {output_csv_path}")
-            return df
-        else:
-            print("Error: Please provide an output CSV path.")
+    # Transform both training and validation data using the same scaler
+    X_train_scaled = pd.DataFrame(scaler.transform(X_train), columns=X_train.columns)
+    X_val_scaled = pd.DataFrame(scaler.transform(X_val), columns=X_val.columns)
 
-    return df
+    return X_train_scaled, X_val_scaled
 
 
 # CSV file
