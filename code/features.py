@@ -3,6 +3,30 @@ import pandas as pd
 output_csv_path = '../output/'
 scores_csv_path = '../depresjon/scores.csv'
 
+def normalise_data(df, columns_to_normalise, method='standard', save_to_csv=False, output_csv_path=None):
+    
+    from sklearn.preprocessing import StandardScaler, MinMaxScaler
+
+    if method == 'standard':
+        scaler = StandardScaler()
+    elif method == 'minmax':
+        scaler = MinMaxScaler()
+    else:
+        raise ValueError("Invalid method. Please choose either 'standard' or 'minmax'.")
+
+    df[columns_to_normalise] = scaler.fit_transform(df[columns_to_normalise])
+
+    if save_to_csv:
+        if output_csv_path:
+            df.to_csv(output_csv_path, index=False)
+            print(f"df saved to {output_csv_path}")
+            return df
+        else:
+            print("Error: Please provide an output CSV path.")
+
+    return df
+
+
 # CSV file
 sunlight_df = pd.read_csv('../norway/Norway_Sunlight.csv')
 
