@@ -139,7 +139,7 @@ def calculate_all_features(dataframe, sunlight_df):
     dataframe = light_dark(dataframe, sunlight_df)
 
     # day/night classification
-    dataframe = day_or_night(dataframe, 8, 20)  # using 8:00 - 20:00 as day time
+    dataframe = day_or_night(dataframe, 8, 21)  # day is 08:00-20:59 inclusive
 
     # active/non-active classification
     dataframe = active_nonactive(dataframe)
