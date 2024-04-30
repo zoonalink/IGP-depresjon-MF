@@ -310,3 +310,22 @@ def plot_metric_dicts(dict_list, metric_name):
         )
     
     plt.show()
+
+
+def model_evaluate_dicts(X_train_scaled, y_train, model, column_sets):
+    results = []
+
+    # each set of columns
+    for cols in column_sets:
+        # keep only columns
+        X = keep_columns(X_train_scaled, cols)
+        
+        # evaluate
+        result = evaluate_models(model, X, y_train)
+        
+        # result
+        results.append(result)
+    
+    # Plot the results
+    plot_metric_dicts(results, "accuracy")
+    plot_metric_dicts(results, "mcc")

@@ -1,11 +1,11 @@
 
-#import pickle
+import pickle
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
-#from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression
 #from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 #from sklearn.metrics import (accuracy_score, recall_score, precision_score, f1_score, matthews_corrcoef, roc_auc_score, make_scorer, confusion_matrix)
 #from time import time
@@ -14,9 +14,9 @@ from sklearn.calibration import LinearSVC
 from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
 from sklearn.ensemble import AdaBoostClassifier, GradientBoostingClassifier
 #from sklearn.naive_bayes import GaussianNB
-#from sklearn.neighbors import KNeighborsClassifier
-#from sklearn.neural_network import MLPClassifier
-#from sklearn.svm import SVC
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.svm import SVC
 #from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
 
@@ -35,27 +35,38 @@ scores_csv_path = '../depresjon/scores.csv'
 RANDOM_STATE = 5
 
 models_male = [
-    ('Gradient Boosting', GradientBoostingClassifier(random_state=RANDOM_STATE)),
+    #('Neural Network', MLPClassifier(max_iter=10000, random_state=RANDOM_STATE)),
+    #('Gradient Boosting', GradientBoostingClassifier(random_state=RANDOM_STATE)),
     ('SVC linear', LinearSVC(dual=False, max_iter=10000, random_state=RANDOM_STATE)),
+    ('SVM linear', SVC(kernel='linear', random_state=RANDOM_STATE)),
+    #('SVM rbf', SVC(kernel='rbf', random_state=RANDOM_STATE)),
     ('XGBoost', XGBClassifier(random_state=RANDOM_STATE)),
     ('LightGBM', LGBMClassifier(verbose=-1, random_state=RANDOM_STATE)),
-    ('QDA', QuadraticDiscriminantAnalysis())
+    ('QDA', QuadraticDiscriminantAnalysis()),
+    ('Logistic Regression', LogisticRegression(max_iter=5000, random_state=RANDOM_STATE))
 ]
 
 models_female = [
+    # ('Neural Network', MLPClassifier(max_iter=10000, random_state=RANDOM_STATE)),
     ('Gradient Boosting', GradientBoostingClassifier(random_state=RANDOM_STATE)),
     ('SVC linear', LinearSVC(dual=False, max_iter=10000, random_state=RANDOM_STATE)),
-    ('XGBoost', XGBClassifier(random_state=RANDOM_STATE)),
+    #('XGBoost', XGBClassifier(random_state=RANDOM_STATE)),
     ('LightGBM', LGBMClassifier(verbose=-1, random_state=RANDOM_STATE)),
-    ('Random Forest', RandomForestClassifier(random_state=RANDOM_STATE))
+    ('Random Forest', RandomForestClassifier(random_state=RANDOM_STATE)),
+    #('SVM rbf', SVC(kernel='rbf', random_state=RANDOM_STATE)),
+    #('KNN', KNeighborsClassifier()),
+    #('AdaBoost', AdaBoostClassifier(algorithm='SAMME', random_state=RANDOM_STATE))
 ]
 
 models_both = [
-    ('Gradient Boosting', GradientBoostingClassifier(random_state=RANDOM_STATE)),
+     ('Neural Network', MLPClassifier(max_iter=10000, random_state=RANDOM_STATE)),#('Gradient Boosting', GradientBoostingClassifier(random_state=RANDOM_STATE)),
     ('XGBoost', XGBClassifier(random_state=RANDOM_STATE)),
     ('LightGBM', LGBMClassifier(verbose=-1, random_state=RANDOM_STATE)),
     ('Random Forest', RandomForestClassifier(random_state=RANDOM_STATE)),
-    ('AdaBoost', AdaBoostClassifier(algorithm='SAMME', random_state=RANDOM_STATE))
+    ('AdaBoost', AdaBoostClassifier(algorithm='SAMME', random_state=RANDOM_STATE)),
+    ('Logistic Regression', LogisticRegression(max_iter=5000, random_state=RANDOM_STATE)),
+    ('SVM linear', SVC(kernel='linear', random_state=RANDOM_STATE)),
+    ('SVC linear', LinearSVC(dual=False, max_iter=10000, random_state=RANDOM_STATE))
 ]
 
 
