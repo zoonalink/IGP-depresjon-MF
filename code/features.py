@@ -92,8 +92,8 @@ def extract_features(dataframe):
         mean='mean',
         std='std',
         median='median', 
-        q1=lambda x: np.percentile(x, 25),  # Add 1st quartile calculation
-        q3=lambda x: np.percentile(x, 75),  # Add 3rd quartile calculation
+        q1=lambda x: np.percentile(x, 25),  
+        q3=lambda x: np.percentile(x, 75),  
         percent_zero=percent_zero,
         kurtosis=lambda x: sp.kurtosis(x, fisher=False)
     ).reset_index()
@@ -167,8 +167,6 @@ def calculate_all_features(dataframe, sunlight_df):
     # merge all features
     all_features = pd.merge(period_features, statistical_features, on=['id', 'date'], how='inner')
 
-    # Drop unnecessary columns
-    #columns_to_drop = ['timestamp', 'day_night', 'active_inactive', 'active_inactive_period','month', 'sunrise', 'sunset', 'sunrise_time', 'sunset_time', 'light_dark', 'kurtosis']
-    #all_features = all_features.drop(columns_to_drop, axis=1)
+  
 
     return all_features
