@@ -9,6 +9,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from lightgbm import LGBMClassifier
 import numpy as np
+from sklearn.model_selection import RandomizedSearchCV
 
 output_csv_path = '../output/'
 
