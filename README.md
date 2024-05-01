@@ -9,7 +9,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Contributing](#contributing)
-- [License](#license)
+- [License](/LICENSE.md)
 - [Contact](#contact)
 
 ## Installation
@@ -66,9 +66,6 @@ import shap
 
 ```
 
-## License
-
-Specify the license under which the project is distributed.
 
 ## Contact
 
