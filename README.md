@@ -8,8 +8,6 @@
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Contributing](#contributing)
-- [License](/LICENSE.md)
 - [Contact](#contact)
 
 ## Installation
